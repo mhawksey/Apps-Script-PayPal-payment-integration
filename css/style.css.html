@@ -1,0 +1,95 @@
+<style>
+  body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+
+  nav {
+    padding-top:10px;
+    padding-left:7px;
+    border-bottom: 1px solid rgb(218, 220, 224);
+    font-weight: 400;
+    position:sticky;
+    right:0;
+    top:0;
+  }
+  nav .brand-logo {
+    color: #333;
+    background-image: url(https://www.appsheet.com/content/img/appicons/procurement.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    height: 36px;
+    margin-right: 6.5px;
+    padding-left: 40px;
+    font-size: 18px;
+    line-height: 2;
+  }
+
+  main {
+    flex: 1 0 auto;
+    margin-bottom: 60px;
+  }
+
+  #overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color:#000;
+    opacity: .80;
+    z-index: 9999999;
+  }
+
+  .preloader-wrapper{
+    margin-top: 25%;
+  }
+
+  .container div {
+    margin-top: 20px;
+  }
+
+  .page-footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: rgb(255, 255, 255);
+    border-top: 1px solid rgb(218, 220, 224);
+    border-right: none;
+    border-bottom: none;
+    border-left: none;
+    border-image: initial;
+    height: 60px;
+    padding: 0;
+    box-shadow: rgb(0 0 0 / 14%) 3px 4px, rgb(0 0 0 / 12%) 0px 3px 3px, rgb(0 0 0 / 20%) 0px 1px 8px;
+    z-index: 999;
+  }
+
+  .page-footer .row{
+    margin-bottom:0;
+  }
+  .page-footer .btn-flat {
+    line-height:1;
+    text-transform:initial;
+    height: 60px;
+    padding-top:10px;
+  }
+
+  .page-footer a {
+    color: #5f6368;
+    font-size:12px;
+  }
+
+  .page-footer a span{
+    display:block;
+    padding-top:5px;
+  }
+  @media only screen and (max-width: 992px){
+    nav .brand-logo {
+        left: initial;
+        -webkit-transform: initial;
+        transform: initial;
+    }
+  }
+</style>

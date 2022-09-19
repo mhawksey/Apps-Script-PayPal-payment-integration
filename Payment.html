@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <script src="https://www.paypal.com/sdk/js?client-id=<?!= CLIENT_ID ?>"></script>
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+  <?!= include('css/style.css'); ?>
+</head>
+
+<body>
+  <nav class="white z-depth-0" role="navigation">
+    <div class="nav-wrapper"><a id="logo-container" href="#" class="brand-logo">Payment</a>
+    </div>
+  </nav>
+  <main class="center-align">
+    <div id="overlay">
+      <div class="preloader-wrapper big active ">
+        <div class="spinner-layer spinner-blue-only">
+          <div class="circle-clipper left">
+            <div class="circle"></div>
+          </div>
+          <div class="gap-patch">
+            <div class="circle"></div>
+          </div>
+          <div class="circle-clipper right">
+            <div class="circle"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <h1 id="title">Order Summary</h1>
+      <div id="ref"></div>
+      <!-- Order summary table -->
+      <table id="info">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+          </tr>
+        </thead>
+
+        <tbody id="summary">
+          <tr>
+            <td>Loading...</td>
+          </tr>
+        </tbody>
+
+        <tfoot>
+          <tr>
+            <th colspan="2" class="right-align">Total</th>
+            <th id="total"></th>
+          </tr>
+        </tfoot>
+      </table>
+
+      <!-- PayPal checkout button (dynamically rendered)-->
+      <div id="paypal-button-container"></div>
+
+      <!-- Return to app button -->
+      <div>
+        <a href="<?= APP_URL ?>#view=Cart" class="waves-effect blue waves-light btn-large">Return to App</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Mocking menu buttons -->
+  <footer class="page-footer">
+    <div>
+      <div class="row">
+        <div class="col s3 waves-effect waves-grey btn-flat center-align">
+          <a href="<?= APP_URL ?>#view=Welcome_Main">
+            <i class="fas fa-home"></i><span>Home</span></a>
+        </div>
+        <div class="col s3 waves-effect waves-grey btn-flat center-align">
+          <a href="<?= APP_URL ?>#view=Current_User">
+            <i class="fas fa-user-circle"></i><span>My Info</span></a>
+        </div>
+        <div class="col s3 waves-effect waves-grey btn-flat center-align">
+          <a href="<?= APP_URL ?>#view=Menu">
+            <i class="fas fa-utensils"></i><span>Menu</span></a>
+        </div>
+        <div class="col s3 waves-effect waves-grey btn-flat center-align">
+          <a href="<?= APP_URL ?>#view=Cart">
+            <i class="fas fa-shopping-cart"></i><span>Cart</span></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const customer_id = '<?= customer_id ?>';
+  
+    function showOrderSummary(order) {
+        // generate the summary table
+        let table = document.getElementById('summary');
+        const rows = order.customer_order.map((item, index) => {
+          return `<tr>
+                            <td>${item.product}</td>
+                            <td>${item.quantity}</td>
+                            <td>$${item.total}</td>
+                        </tr>`;
+        }).join('');
+        table.innerHTML = rows;
+
+        document.getElementById('total').innerHTML = "$" + order.total;
+        document.getElementById('overlay').classList.add("hide");
+
+        if (order.total > 0) {
+          // add PayPal payment buttons
+          // @See https://developer.paypal.com/sdk/js/reference/#link-onapprove
+          paypal.Buttons({
+            createOrder: function (data, actions) {
+              // This function sets up the details of the transaction, including the amount and line item details.
+              return actions.order.create({
+                purchase_units: [{
+                  amount: {
+                    value: order.total,
+                    currency_code: 'USD'
+                  }
+                }]
+              });
+            },
+            onApprove: function (data, actions) {
+              // This function captures the funds from the transaction.
+              return actions.order.capture().then(function (details) {
+                // This function shows a transaction success message to your buyer.
+                document.getElementById('overlay').classList.remove("hide");
+                google.script.run
+                  .withSuccessHandler(completedTransaction)
+                  .recordPayment(customer_id, details);
+              });
+            }
+          }).render('#paypal-button-container');
+          //This function displays payment buttons on your web page.
+        }
+      }
+
+      // handles UI updated once user returns from PayPal
+      function completedTransaction(response) {
+        console.log(response);
+        document.getElementById('paypal-button-container').classList.add("hide");
+        document.getElementById('overlay').classList.add("hide")
+        document.getElementById('info').remove();
+        document.getElementById('title').innerHTML = "Order Complete";
+        document.getElementById('ref').innerHTML = `Your payment reference is: <code>${response.id}</code>`
+      }
+            
+      // callback to Google Sheet to get customer order summary
+      google.script.run
+        .withSuccessHandler(showOrderSummary)
+        .getCustomerOrder(customer_id);
+        
+  </script>
+
+  <!-- Compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+  <!-- Load Font Awesome -->
+  <script src="https://kit.fontawesome.com/3e98defc0e.js" crossorigin="anonymous"></script>
+</body>
+
+</html>
